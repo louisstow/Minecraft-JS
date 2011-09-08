@@ -55,19 +55,19 @@ function setupPlayer() {
 						} else {
 							//if sticking out of the ground
 							if(dy > 16) {
+								//check for above blocks
 								if(dy - this._h > 16) {
 									this.y = box._y + TILE;
 								} else {
-								
-								//check for player walking left
-								if(dx > 16 && this._x > box._x) {
-									this.x = box._x + TILE;
-								}
-								
-								//check for player walking right
-								if(dx - this._w < 16 && this._x < box._x) {
-									this.x = box._x - this._w;
-								}
+									//check for player walking left
+									if(dx > 16 && this._x > box._x) {
+										this.x = box._x + TILE;
+									}
+									
+									//check for player walking right
+									if(dx - this._w < 16 && this._x < box._x) {
+										this.x = box._x - this._w;
+									}
 								}
 							}
 						}
@@ -257,7 +257,18 @@ $(function() {
 				var b = MAP[data.chunk][data.x][data.y];
 				b.destroy();
 			} else if(data.a === 1) {
-			
+				var c = data.chunk.split(","),
+					cx = +c[0] * W, cy = +c[1] * H,
+					x = data.x, y = data.y,
+					block = SpriteMap[data.b],
+					b;
+					
+				//remove it if it exists
+				if(MAP[data.chunk][x][y]) MAP[data.chunk][x][y].destroy();
+				delete MAP[data.chunk][x][y];
+				
+				MAP[data.chunk][x][y] = Crafty.e("2D, solid, Canvas, " + block)
+							.attr({x: cx + x * TILE, y: cy + y * TILE, type: block, col: x, row: y, chunk: data.chunk});
 			}
 		});
 		
@@ -312,7 +323,7 @@ function clickHandler(e) {
 		}
 	} else if(e.which === 3) {
 		//if nothing selected, don't place anything
-		if(!inventory[selected]) {
+		if(inventory[selected] === undefined) {
 			console.log("Nothing selected", inventory[selected], selected);
 			return;
 		}
@@ -339,7 +350,7 @@ function clickHandler(e) {
 			MAP[chunk][x][y] = Crafty.e("2D, solid, Canvas, " + type)
 							.attr({x: toGrid(block.x), y: toGrid(block.y), type: type, col: x, row: y, chunk: chunk});
 							
-			socket.emit("updatemap", {a: 1, x: x, y: y, b: selected, chunk: chunk});
+			socket.emit("updatemap", {a: 1, x: x, y: y, b: inventory[selected], chunk: chunk});
 		} else {
 			console.log("Too far", Math.abs(block.x - (me._x + 10)), Math.abs(block.y - (me._y + TILE)));
 		}
