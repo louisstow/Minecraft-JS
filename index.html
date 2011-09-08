@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Minecraft 2D - Alpha Alpha</title>
+	<link href="assets/global.css" type="text/css" rel="stylesheet"/>
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script type="text/javascript" src="assets/mousewheel.js"></script>
+	<script type="text/javascript" src="assets/crafty-min.js"></script>
+	
+	<script type="text/javascript" src="assets/sprite.js"></script>
+	<script type="text/javascript" src="mc.js"></script>
+</head>
+<body>
+
+<div id="cr-stage">
+
+<div id="list">
+<ul></ul>
+</div>
+
+<ul id="inventory">
+	<li class="over"><a class="empty"></a></li>
+	<li><a class="empty"></a></li>
+	<li><a class="empty"></a></li>
+	<li><a class="empty"></a></li>
+	<li><a class="empty"></a></li>
+	<li><a class="empty"></a></li>
+	<li><a class="empty"></a></li>
+	<li><a class="empty"></a></li>
+	<li class="end"><a class="empty"></a></li>
+</ul>
+
+</div>
+
+<div id="login">
+<strong class="msg">Nickname taken</strong><br />
+Choose your name: <input type="text" id="nick" />
+<button id="subm">Go</button>
+</div>
+
+<div id="credits">
+<a href="http://mojang.com/">Minecraft is owned by Mojang AB</a><br />
+<a href="http://www.minecraft.net/prepurchase.jsp">Buy the real Minecraft</a>
+</div>
+
+<div id="crafty">
+<a href="http://craftyjs.com"><img src="http://craftyjs.com/images/logo.png" alt="Crafty JS, JavaScript Game Engine"/></a>
+</div>
+</body>
+</html>
