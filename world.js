@@ -54,10 +54,19 @@ function genMiddle(map, level) {
 				else if(r > 85) map[x][y] = 10;
 				else if(r > 70) map[x][y] = 15;
 				else map[x][y] = 30;
-			} else if(level == 2) {
+			} else if(level == 3) {
 				map[x][y] = 37;
 			}
 		}
+	}
+}
+
+/**
+* Generate an empty array
+*/
+function genAir(map) {
+	for(var i = 0; i < 16; ++i) {
+		map[i] = [];
 	}
 }
 	
@@ -70,19 +79,22 @@ this.generate = function(chunkX, chunkY) {
 	var chunk = MAP[chunkX+","+chunkY];
 	
 	//don't generate the sky
-	if(chunkY < 0) return;
+	if(chunkY < 0) {
+		genAir(chunk);
+		return;
+	}
 	
 	//on the ground
 	if(chunkY == 0) {
 		genTop(chunk);
 	} //iron and maybe gold
-	else if(chunkY > 0 && chunkY < 2) {
+	else if(chunkY > 0 && chunkY < 3) {
 		genMiddle(chunk, 1);
 	} //diamond, gold and iron
-	else if(chunkY > 2 && chunkY < 5) {
+	else if(chunkY >= 3 && chunkY < 5) {
 		genMiddle(chunk, 2);
 	} //bedrock and lava
-	else if(chunkY >= 5) {
+	else {
 		genMiddle(chunk, 3);
 	}
 };

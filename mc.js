@@ -17,7 +17,7 @@ function toGrid(n) {
 function setupPlayer() {
 	me = Crafty.e("2D, Canvas, player_u, Controls, Twoway, Collision")
 			.crop(6,0,20,64)
-			.twoway(2,6)
+			.twoway(2,6.5)
 			.attr({x: Crafty.viewport.width / 2, z: 2, chunk: [0, 0], location: "", loading: 0, _gy: 0, _gravity: 0.2, _falling: true})
 			.bind("KeyDown", function(e) {
 				if(this.isDown(Crafty.keys.A) || this.isDown(Crafty.keys.LEFT_ARROW)) 
@@ -28,7 +28,7 @@ function setupPlayer() {
 			.bind("EnterFrame", function() {
 				if(this._falling) {
 					//if falling, move the players Y
-					this._gy += this._gravity * 2;
+					if(this._gy < 20) this._gy += this._gravity * 2;
 					this.y += this._gy;
 				} else {
 					this._gy = 0; //reset change in y
@@ -184,11 +184,11 @@ function loadMap(chunk, data) {
 
 $(function() {
 	Crafty.init(512, 416);
-	$("#login").css("left", $(window).width() / 2 - $("#login").width() / 2);
 	
 	//preload all assets
-	Crafty.load(["assets/sprite.png"], function() {
+	Crafty.load(["assets/sprite.png", "assets/sprite16.png"], function() {
 		$("#login").show();
+		
 		$("#subm").click(function() {
 			var name = $("#nick").val();
 			socket.on("error", function() {
@@ -199,7 +199,6 @@ $(function() {
 				$("#login").hide();
 				$("#subm").unbind();
 				
-				console.log(data);
 				MAP["0,0"] = data;
 				
 				Crafty.scene("main");
@@ -213,6 +212,7 @@ $(function() {
 	});
 	
 	Crafty.scene("main", function() {
+		$("#inventory").show();
 		setupPlayer();
 		loadMap("0,0");
 		
@@ -222,7 +222,6 @@ $(function() {
 			if(!players[data.name]) 
 				players[data.name] = Crafty.e("NPC").npc(data.name);
 				
-			console.log("PLAYERMOVE", data);
 			p = players[data.name];
 			chunk = data.pos.chunk;
 			pos = data.pos.pos;
@@ -234,7 +233,6 @@ $(function() {
 		});
 		
 		socket.on("playerleave", function(name) {
-			console.log(name);
 			if(players[name]) {
 				players[name].destroy();
 				delete players[name];
@@ -243,13 +241,10 @@ $(function() {
 		
 		socket.on("newchunk", function(data) {
 			me.loading--;
-			console.log(data, me.loading);
 			loadMap(data.key, data.data);
 		});
 		
 		socket.on("blockchange", function(data) {
-			console.log("BLOCKCHANGE", data);
-			
 			//don't care
 			if(!MAP[data.chunk]) return;
 			
@@ -289,8 +284,8 @@ function initList() {
 	for(; i < l; ++i) {
 		o = SpriteMap[i];
 		
-		html += "<li data-id='"+i+"' style='background: url(assets/sprite.png) no-repeat ";
-		html += "-" + (Sprites[o][0] * TILE) + "px -" + (Sprites[o][1] * TILE) +"px";
+		html += "<li data-id='"+i+"' style='background: url(assets/sprite16.png) no-repeat ";
+		html += "-" + (Sprites[o][0] * 16) + "px -" + (Sprites[o][1] * 16) +"px";
 		html += "'></li>"
 	}
 	
@@ -300,11 +295,8 @@ function initList() {
 		var i = +$(this).attr("data-id"),
 			s = Sprites[SpriteMap[i]];
 			
-		console.log();
 		inventory[selected] = i;
 		$("#inventory a").eq(selected).css("background", "url(assets/sprite.png) no-repeat -" + (s[0] * TILE) + "px -" + (s[1] * TILE) +"px");
-		
-		console.log($("#inventory a").eq(selected), "url(assets/sprite.png) no-repeat -" + (s[0] * TILE) + "px -" + (s[1] * TILE), i, selected);
 	});
 }
 
@@ -324,7 +316,6 @@ function clickHandler(e) {
 	} else if(e.which === 3) {
 		//if nothing selected, don't place anything
 		if(inventory[selected] === undefined) {
-			console.log("Nothing selected", inventory[selected], selected);
 			return;
 		}
 		
@@ -337,13 +328,12 @@ function clickHandler(e) {
 		//within reach 
 		if(Math.abs(block.x - (me._x + 10)) < 60 && Math.abs(block.y - (me._y + TILE)) < 60) {
 			//if block contained
-			if(MAP[chunk][x][y]) {
-				console.log("MAP", MAP[chunk][x][y])
-				return;
-			}
+			console.log(chunk, x, y);
+			if(!MAP[chunk][x] || MAP[chunk][x][y]) { console.log("no MAP"); return; }
+			
 			
 			if(x > 0 && x < 13 && y > 0 && y < 16 && !MAP[chunk][x-1][y] && !MAP[chunk][x][y-1] && !MAP[chunk][x+1][y] && !MAP[chunk][x][y+1]) {
-				console.log("nothing surrounding the blocks");
+				console.log("no surrounding");
 				return;
 			}
 			
@@ -351,8 +341,6 @@ function clickHandler(e) {
 							.attr({x: toGrid(block.x), y: toGrid(block.y), type: type, col: x, row: y, chunk: chunk});
 							
 			socket.emit("updatemap", {a: 1, x: x, y: y, b: inventory[selected], chunk: chunk});
-		} else {
-			console.log("Too far", Math.abs(block.x - (me._x + 10)), Math.abs(block.y - (me._y + TILE)));
 		}
 	}
 }
@@ -361,7 +349,6 @@ function scroll(e,d) { //Scroll through inventory
 	var s = selected;
 	
 	function select(i) {
-		console.log(i);
 		var list = $("#inventory a");
 		list.parent().removeClass('over');
 		list.eq(i).parent().addClass('over');
@@ -398,8 +385,6 @@ function findBlock(e) {
 	dx *= 2;
 	dy *= 2;
 
-	console.log(x, y, x1, y1);
-	
 	for (; n > 0; n-=1) {
 		//find along the path in the Crafty HashMap
 		var q = Crafty.map.search({_x: ~~x, _y: ~~y, _w: 1, _h: 1}),

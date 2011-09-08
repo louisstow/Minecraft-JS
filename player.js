@@ -62,12 +62,14 @@ this.remove = function(name) {
 		if(found) break;
 	}
 	
-	chunk = key.split(",");
+	if(key) {
+		chunk = key.split(",");
 	
-	//remove from names registry
-	delete names[name];
+		//remove from names registry
+		delete names[name];
 	
-	broadcast(chunk[0], chunk[1], "playerleave", name, name);
+		broadcast(chunk[0], chunk[1], "playerleave", name, name);
+	}
 }
 
 function broadcast(chunkX, chunkY, event, msg, name) {
