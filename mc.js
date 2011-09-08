@@ -302,8 +302,7 @@ function initList() {
 
 function clickHandler(e) {
 	var block,
-		type = SpriteMap[inventory[selected]],
-		x, y;
+		type = SpriteMap[inventory[selected]];
 	
 	if(e.which === 1) {
 		block = findBlock(e);
@@ -321,19 +320,41 @@ function clickHandler(e) {
 		
 		block = Crafty.DOM.translate(e.clientX, e.clientY);
 		
-		x = Math.floor(block.x / TILE) % 16;
-		y = Math.floor(block.y / TILE) % 13;
-		var chunk = Math.floor(block.x / W) + "," + Math.floor(block.y / H);
+		var c1 = Math.floor(block.x / W),
+			c2 = Math.floor(block.y / H),
+			chunk = c1 + "," + c2,
+			cx = Math.floor(block.x / W) * W,
+			cy = Math.floor(block.y / H) * H,
+			x = Math.floor((block.x - cx) / TILE),
+			y = Math.floor((block.y - cy) / TILE),
+			test = false;
 		
 		//within reach 
 		if(Math.abs(block.x - (me._x + 10)) < 60 && Math.abs(block.y - (me._y + TILE)) < 60) {
 			//if block contained
-			console.log(chunk, x, y);
+			console.log(chunk, x, y, cx, cy);
 			if(!MAP[chunk][x] || MAP[chunk][x][y]) { console.log("no MAP"); return; }
 			
+			//check in other chunks
+			if(x === 0) {
+				test = !!MAP[(c1 - 1) + "," + c2][15][y];
+			}
 			
-			if(x > 0 && x < 13 && y > 0 && y < 16 && !MAP[chunk][x-1][y] && !MAP[chunk][x][y-1] && !MAP[chunk][x+1][y] && !MAP[chunk][x][y+1]) {
-				console.log("no surrounding");
+			if(!test && y === 0) {
+				test = !!MAP[c1 + "," + (c2 - 1)][x][12];
+			}
+			
+			if(!test && x === 15) {
+				test = !!MAP[(c1 + 1) + "," + c2][0][y];
+			}
+			
+			if(!test && y === 12) {
+				test = !!MAP[c1 + "," + (c2 + 1)][x][0];
+			}
+				
+			//check in current chunk
+			if(!test && !MAP[chunk][x-1][y] && !MAP[chunk][x][y-1] && !MAP[chunk][x+1][y] && !MAP[chunk][x][y+1]) {
+				console.log("no surrounding", test);
 				return;
 			}
 			
